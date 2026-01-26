@@ -10,6 +10,40 @@
 <body>
   <main>
     <h1 class='title'>How are you feeling today?</h1>
-    </main>
+    <div class="'btn-container">
+        <button id="happy-btn" class="emoji-btn" aria-label="Happy face emoji">
+        <span role="img" aria-hidden="true">😊</span>
+        <span class="count">0/10</span>
+      </button>
+      <button
+        id="confused-btn"
+        class="emoji-btn"
+        aria-label="Confused face emoji"
+      >
+        <span role="img" aria-hidden="true">😕</span>
+        <span class="count">0/10</span>
+      </button>
+      <button id="sad-btn" class="emoji-btn" aria-label="Angry face emoji">
+        <span role="img" aria-hidden="true">😠</span>
+        <span class="count">0/10</span>
+      </button>
+      <button
+        id="loving-btn"
+        class="emoji-btn"
+        aria-label="Loving face emoji"
+      >
+        <span role="img" aria-hidden="true">😍</span>
+        <span class="count">0/10</span>
+      </button>
+
+        <button
+        id="reset-btn"
+        class="btn"
+        aria-label="Count reset button"
+      >Reset
+      </button>
+    </div>
+   </main>
+   <script src="./script.js"></script>
 </body>
 </html>
