@@ -1,119 +1,105 @@
 const form = document.getElementById("form")
-const fullName = document.getElementById("full-name")
-const email = document.getElementById("email")
-const emailRegex = /^\w+@\w+\.com/
-const orderNo = document.getElementById("order-no")
-const orderRegex = /2024\d{6}/
-const productCode = document.getElementById("product-code")
-const prodRegex = /[a-zA-Z]{2}\d{2}-[a-zA-Z]{1}\d{3}-[a-zA-Z]{2}\d{1}/
-const quantity = document.getElementById("quantity")
+const rules = {
+  'full-name': (val) => !!val,
+    'email': /^\w+@\w+\.com/,
+    'order-no': /2024\d{6}/,
+    'product-code': /[a-zA-Z]{2}\d{2}-[a-zA-Z]{1}\d{3}-[a-zA-Z]{2}\d{1}/,
+    'quantity': (val) => parseInt(val) > 0  && (/\d+/.test(val))
+}
+
 const submitBtn = document.getElementById("submit-btn")
-const complaintsGroup = document.getElementById("complaints-group")
+
 const solutionsGroup = document.getElementById("solutions-group")
-const complaintDescription = document.getElementById("complaint-description")
 
 const complaintDescriptionContainer = document.getElementById("complaint-description-container")
 complaintDescriptionContainer.style.display = "none";
-
 
 const solutionDescription = document.getElementById("solution-description")
 const solutionDescriptionContainer = document.getElementById("solution-description-container")
 solutionDescriptionContainer.style.display = "none";
 
-const validateComplaints = (obj) => {
-  const checkboxes = document.querySelectorAll('input[type="checkbox"]')
-
-  console.log("checkbox result", Array.from(checkboxes).some(box => box.checked))
-
-obj["complaints-group"] = Array.from(checkboxes).some(box => box.checked)
-
-complaintsGroup.style.borderColor =  obj["complaints-group"] ? "green" : "red";
-obj["complaint-description"] = true;
-
-//if other is checked
-if (document.getElementById("other-complaint").checked){
-  complaintDescriptionContainer.style.display = "block";
-  console.log("other complaint checked, validating written input")
-
-  obj["complaint-description"] = (complaintDescription.value.length >= 20)
-  complaintDescription.style.borderColor = obj["complaint-description"] ? "green" : "red";
-  }
-
-//complaintDescription.style.borderColor = (obj["complaint-description"] && obj["complaints-group"]) ? "green" : "red";
-
-}
-
-const validateSolutions = (obj) => {
-   const solutions = document.querySelectorAll('input[name="solutions"]')
-
-   const otherSolution = document.getElementById("other-solution")
-
-     obj["solutions-group"] = Array.from(solutions).some(radio => radio.checked)
-  solutionsGroup.style.borderColor = obj["solutions-group"] ? "green" : "red";
-
-
-     obj["solution-description"] = true
-
-  if (otherSolution.checked){
-    solutionDescriptionContainer.style.display = "block";
-    console.log("other solution checked, validating written input")
-    obj["solution-description"] = solutionDescription.value.length >= 20
-    solutionDescription.style.borderColor = obj["solution-description"] ? "green" : "red";
-  }
-
-}
+const simpleInput = form.querySelectorAll('#personal-info input, #product-info input')
 
 
 const validateForm = () => {
-  let obj = {}
-  //full name is not empty
-  obj["full-name"] = fullName.value ? true : false
-  //email format validation
-  obj.email = emailRegex.test(email.value)
-  //order no validation
-  obj["order-no"] = orderRegex.test(orderNo.value)
+    let obj = {}
+    //handle text input
 
-  obj["product-code"] = prodRegex.test(productCode.value)
+    simpleInput.forEach((item) => {
+        const rule = rules[item.name]
+        if (rule instanceof RegExp){
+            obj[item.name] = rule.test(item.value)
+        }
+        else if (typeof rule === "function" ){
+            obj[item.name] = rule(item.value)
+        }
+        else{
+            obj[item.name] = !!item.value
+        }
+    })
 
-  console.log("quantity value", quantity.value, parseInt(quantity.value) > 0 && /\d+/.test(quantity.value))
-  obj.quantity = parseInt(quantity.value) > 0 && /\d+/.test(quantity.value)
+    //handle input from groups
+    const validateGroup = (groupName, groupId, otherId, descriptionId) => {
 
-//something is checked from complaintgroup
-//if other checked, complaint description has at least 20 chasrs
- validateComplaints(obj)
- validateSolutions(obj)
-//if other is checked in solutions group, description contains at least 20 char
-  console.log("validateForm Returns:", obj)
-  return obj
+       const group = document.getElementById(groupId)
+       const other = document.getElementById(otherId)
+       const description = document.getElementById(descriptionId)
+
+        const options = group.querySelectorAll(`input[name="${groupName}"]`)
+        //is something checked in this group?
+      obj[groupId] = Array.from(options).some(item => item.checked)
+        obj[descriptionId] = !other.checked || description.value.length >= 20
+
+  console.log("checked", Object.entries(options).some(item => item.checked))
+    }
+
+    validateGroup("complaint", "complaints-group", "other-complaint", "complaint-description")
+    validateGroup("solutions", "solutions-group", "other-solution", "solution-description")
+
+    console.log("validateform returns", obj)
+    return obj
 }
 
-form.addEventListener("change", validateForm)
+const isValid = (state) => {
+  return Object.values(state).every(item => item)
+}
 
 
-const isValid = (obj) => {
-  console.log("isvalid output", Object.values(obj).every((item) => item))
+const updateUI = () => {
+  const state = validateForm()
+    //simple input
+    simpleInput.forEach((item) => {
+      console.log(item.name, state[item.name] )
+        item.style.borderColor = state[item.name] ? "green" : "red";
+    })
 
-  return Object.values(obj).every(item => item)
+    const complaintsGroup = document.getElementById("complaints-group")
+    const complaintDescription = document.getElementById("complaint-description")
+    //group
+    complaintsGroup.style.borderColor = state[complaintsGroup.id] ? "green" : "red";
+
+    if (document.getElementById("other-complaint").checked){
+      complaintDescriptionContainer.style.display = "block"
+    }
+
+   complaintDescription.style.borderColor = state[complaintDescription.id] ? "green" : "red";
+
+    const solutionsGroup = document.getElementById("solutions-group")
+    //group
+    solutionsGroup.style.borderColor = state[solutionsGroup.id] ? "green" : "red";
+
+    if (document.getElementById("other-solution").checked){
+      solutionDescriptionContainer.style.display = "block"
+    }
+       solutionDescription.style.borderColor = state[solutionDescription.id] ? "green" : "red";
 
 }
 
-const fields = [fullName, email, orderNo, productCode, quantity]
+//console.log(document.getElementById("complaints-group").name)
+form.addEventListener("change", updateUI)
 
-fields.map(field => {
-  console.log("fieldname", field.name)
-  field.addEventListener("change", () => {
-  console.log("change hit")
-  console.log(validateForm()[field.name])
-  field.style.borderColor = validateForm()[field.name] ? "green": "red";
-  }
-  )
-})
-
-console.log(emailRegex.test("example@domain.com"))
-
-form.addEventListener("submit",
-//call isValid
-//highlight invalid field if any
-() => {
+form.addEventListener("submit", () => {
   isValid(validateForm())
 })
+
+}
