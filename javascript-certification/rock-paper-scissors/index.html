@@ -113,6 +113,19 @@ if ((playerScore == 3 && computerScore < 3) || (computerScore == 3 && playerScor
 
 };
 
+const resetGame = () => {
+  playerScore = 0
+  computerScore = 0
+  playerScoreSpanElement.textContent = playerScore
+  computerScoreSpanElement.textContent = computerScore
+  resetGameBtn.style.display = "none";
+  optionsContainer.style.display = "block"
+  winnerMsgElement.textContent = ''
+  roundResultsMsg.textContent = ''
+}
+
+resetGameBtn.addEventListener("click", resetGame);
+
 const rockBtn = document.getElementById("rock-btn");
 const paperBtn = document.getElementById("paper-btn");
 const scissorsBtn = document.getElementById("scissors-btn");

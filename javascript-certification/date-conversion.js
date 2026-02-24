@@ -22,5 +22,5 @@ const formatDateLong = (obj) => {
     }
     const formatted = obj.toLocaleDateString("en-US", options)
 
-  return ` Formatted Date (Month Day, Year): ${formatted}`
+  return `Formatted Date (Month Day, Year): ${formatted}`
 }
